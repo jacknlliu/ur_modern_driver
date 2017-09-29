@@ -83,11 +83,11 @@ protected:
 	boost::shared_ptr<controller_manager::ControllerManager> controller_manager_;
 
 public:
-	RosWrapper(std::string host, int reverse_port) :
+	RosWrapper(std::string host, int reverse_port, std::string reverse_ip_addr) :
 			as_(nh_, "follow_joint_trajectory",
 					boost::bind(&RosWrapper::goalCB, this, _1),
 					boost::bind(&RosWrapper::cancelCB, this, _1), false), robot_(
-					rt_msg_cond_, msg_cond_, host, reverse_port, 0.03, 300), io_flag_delay_(0.05), joint_offsets_(
+					rt_msg_cond_, msg_cond_, host, reverse_port, reverse_ip_addr, 0.03, 300), io_flag_delay_(0.05), joint_offsets_(
 					6, 0.0) {
 
 		std::string joint_prefix = "";
@@ -801,6 +801,9 @@ int main(int argc, char **argv) {
 	std::string host;
 	int reverse_port = 50001;
 
+	std::string reverse_ip_addr = "";
+
+
 	ros::init(argc, argv, "ur_driver");
 	ros::NodeHandle nh;
 	if (ros::param::get("use_sim_time", use_sim_time)) {
@@ -826,7 +829,22 @@ int main(int argc, char **argv) {
 	} else
 		reverse_port = 50001;
 
-	RosWrapper interface(host, reverse_port);
+	if (!(ros::param::get("~reverse_ip_address", reverse_ip_addr))) {
+		if (argc > 2) {
+			print_warning(
+					"Please set the parameter reverse_ip instead of giving it as a command line argument. This method is DEPRECATED");
+			reverse_ip_addr = argv[2];
+		} else {
+			print_fatal(
+					"Could not get reverse ip. Please supply it as command line parameter or on the parameter server as reverse_ip");
+			exit(1);
+		}
+
+	}
+
+	ROS_INFO("reverse ip: %s", reverse_ip_addr.c_str());
+
+	RosWrapper interface(host, reverse_port, reverse_ip_addr);
 
 	ros::AsyncSpinner spinner(3);
 	spinner.start();

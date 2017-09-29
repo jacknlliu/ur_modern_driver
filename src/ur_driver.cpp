@@ -20,10 +20,10 @@
 
 UrDriver::UrDriver(std::condition_variable& rt_msg_cond,
 		std::condition_variable& msg_cond, std::string host,
-		unsigned int reverse_port, double servoj_time,
+		unsigned int reverse_port, std::string reverse_ip_addr,double servoj_time,
 		unsigned int safety_count_max, double max_time_step, double min_payload,
 		double max_payload, double servoj_lookahead_time, double servoj_gain) :
-		REVERSE_PORT_(reverse_port), maximum_time_step_(max_time_step), minimum_payload_(
+		REVERSE_PORT_(reverse_port), reverse_ip_addr_(reverse_ip_addr),maximum_time_step_(max_time_step), minimum_payload_(
 				min_payload), maximum_payload_(max_payload), servoj_time_(
 				servoj_time), servoj_lookahead_time_(servoj_lookahead_time), servoj_gain_(servoj_gain) {
 	char buffer[256];
@@ -252,7 +252,11 @@ bool UrDriver::start() {
 	rt_interface_->robot_state_->setVersion(firmware_version_);
 	if (!rt_interface_->start())
 		return false;
-	ip_addr_ = rt_interface_->getLocalIp();
+	if (reverse_ip_addr_ != "") {
+		ip_addr_ = reverse_ip_addr_;  // improve the reverse proxy, tell a exact IP to real UR robot
+	} else {
+		ip_addr_ = rt_interface_->getLocalIp();
+	}
 	print_debug(
 			"Listening on " + ip_addr_ + ":" + std::to_string(REVERSE_PORT_)
 					+ "\n");
