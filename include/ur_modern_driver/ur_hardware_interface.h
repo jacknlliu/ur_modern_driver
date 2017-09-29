@@ -96,9 +96,9 @@ public:
 
 	void setMaxVelChange(double inp);
 
-	bool canSwitch(
+	bool prepareSwitch(
 			const std::list<hardware_interface::ControllerInfo> &start_list,
-			const std::list<hardware_interface::ControllerInfo> &stop_list) const;
+			const std::list<hardware_interface::ControllerInfo> &stop_list);
 	void doSwitch(const std::list<hardware_interface::ControllerInfo>&start_list,
 			const std::list<hardware_interface::ControllerInfo>&stop_list);
 
