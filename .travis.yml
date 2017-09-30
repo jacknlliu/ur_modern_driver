@@ -1,0 +1,15 @@
+sudo: required
+language: generic
+services:
+  - docker
+notifications:
+  #  Whoever receives success and/or failure via email
+  email:
+    recipients:
+      - jacknlliu@gmail.com
+before_install:
+- docker pull jacknlliu/ros:kinetic-ide-init
+- docker images |grep "kinetic-ide-init"
+
+scripts:
+- docker run --rm jacknlliu/ros:kinetic-ide-init /bin/bash -c "cd /home/ros; mkdir -p catkin_ws/src && cd catkin_ws/src && catkin_init_workspace; git clone -b kinetic-devel https://github.com/jacknlliu/ur_modern_driver.git; git clone -b kinetic-devel https://github.com/jacknlliu/universal_robot ;cd ../ && catkin_make --use-ninja "
