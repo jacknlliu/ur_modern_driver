@@ -174,17 +174,16 @@ void UrHardwareInterface::write() {
 bool UrHardwareInterface::prepareSwitch(
 			const std::list<hardware_interface::ControllerInfo> &start_list,
 			const std::list<hardware_interface::ControllerInfo> &stop_list) {
-    ROS_INFO("prepare switch should be run?");
 	for (std::list<hardware_interface::ControllerInfo>::const_iterator controller_it =
 			start_list.begin(); controller_it != start_list.end();
 			++controller_it) {
-		if (controller_it->type.c_str()
-				== "velocity_controllers/JointTrajectoryController") {
+		if (controller_it->claimed_resources.at(0).hardware_interface
+				== "hardware_interface::VelocityJointInterface") {
 			if (velocity_interface_running_) {
 				ROS_ERROR(
 						"%s: An interface of that type (%s) is already running",
 						controller_it->name.c_str(),
-						controller_it->type.c_str());
+						controller_it->claimed_resources.at(0).hardware_interface.c_str());
 				return false;
 			}
 			if (position_interface_running_) {
@@ -193,8 +192,8 @@ bool UrHardwareInterface::prepareSwitch(
 						stop_list.begin();
 						stop_controller_it != stop_list.end();
 						++stop_controller_it) {
-					if (stop_controller_it->type.c_str()
-							== "position_controllers/JointTrajectoryController") {
+					if (stop_controller_it->claimed_resources.at(0).hardware_interface
+							== "hardware_interface::PositionJointInterface") {
 						error = false;
 						break;
 					}
@@ -203,17 +202,17 @@ bool UrHardwareInterface::prepareSwitch(
 					ROS_ERROR(
 							"%s (type %s) can not be run simultaneously with a PositionJointInterface",
 							controller_it->name.c_str(),
-							controller_it->type.c_str());
+							controller_it->claimed_resources.at(0).hardware_interface.c_str());
 					return false;
 				}
 			}
-		} else if (controller_it->type.c_str()
-				== "position_controllers/JointTrajectoryController") {
+		} else if (controller_it->claimed_resources.at(0).hardware_interface
+				== "hardware_interface::PositionJointInterface") {
 			if (position_interface_running_) {
 				ROS_ERROR(
 						"%s: An interface of that type (%s) is already running",
 						controller_it->name.c_str(),
-						controller_it->type.c_str());
+						controller_it->claimed_resources.at(0).hardware_interface.c_str());
 				return false;
 			}
 			if (velocity_interface_running_) {
@@ -222,8 +221,8 @@ bool UrHardwareInterface::prepareSwitch(
 						stop_list.begin();
 						stop_controller_it != stop_list.end();
 						++stop_controller_it) {
-					if (stop_controller_it->type.c_str()
-							== "velocity_controllers/JointTrajectoryController") {
+					if (stop_controller_it->claimed_resources.at(0).hardware_interface
+							== "hardware_interface::VelocityJointInterface") {
 						error = false;
 						break;
 					}
@@ -232,7 +231,7 @@ bool UrHardwareInterface::prepareSwitch(
 					ROS_ERROR(
 							"%s (type %s) can not be run simultaneously with a VelocityJointInterface",
 							controller_it->name.c_str(),
-							controller_it->type.c_str());
+							controller_it->claimed_resources.at(0).hardware_interface.c_str());
 					return false;
 				}
 			}
@@ -250,13 +249,13 @@ void UrHardwareInterface::doSwitch(
 	for (std::list<hardware_interface::ControllerInfo>::const_iterator controller_it =
 			stop_list.begin(); controller_it != stop_list.end();
 			++controller_it) {
-		if (controller_it->type.c_str()
-				== "velocity_controllers/JointTrajectoryController") {
+		if (controller_it->claimed_resources.at(0).hardware_interface
+				== "hardware_interface::VelocityJointInterface") {
 			velocity_interface_running_ = false;
 			ROS_DEBUG("Stopping velocity interface");
 		}
-		if (controller_it->type.c_str()
-				== "position_controllers/JointTrajectoryController") {
+		if (controller_it->claimed_resources.at(0).hardware_interface
+				== "hardware_interface::PositionJointInterface") {
 			position_interface_running_ = false;
 			std::vector<double> tmp;
 			robot_->closeServo(tmp);
@@ -266,13 +265,13 @@ void UrHardwareInterface::doSwitch(
 	for (std::list<hardware_interface::ControllerInfo>::const_iterator controller_it =
 			start_list.begin(); controller_it != start_list.end();
 			++controller_it) {
-		if (controller_it->type
-				== "velocity_controllers/JointTrajectoryController") {
+		if (controller_it->claimed_resources.at(0).hardware_interface
+				== "hardware_interface::VelocityJointInterface") {
 			velocity_interface_running_ = true;
 			ROS_DEBUG("Starting velocity interface");
 		}
-		if (controller_it->type
-				== "position_controllers/JointTrajectoryController") {
+		if (controller_it->claimed_resources.at(0).hardware_interface
+				== "hardware_interface::PositionJointInterface") {
 			position_interface_running_ = true;
 			robot_->uploadProg();
 			ROS_DEBUG("Starting position interface");
