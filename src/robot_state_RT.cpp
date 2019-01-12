@@ -337,6 +337,16 @@ void RobotStateRT::unpack(uint8_t * buf) {
 	} else if (version_ >= 3.2 && version_ < 3.3) { //v3.2
 		if (len != 1060)
 			len_good = false;
+	} else if (version_ >= 3.3 && version_ < 3.5)
+	{
+		if (len != 1060)
+			len_good = false;
+	} else if (version_ >= 3.5 && version_ <=3.8)
+	{
+		if (len != 1108)
+		{
+			len_good = false;
+		}
 	}
 
 	if (!len_good) {
